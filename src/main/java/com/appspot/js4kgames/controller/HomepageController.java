@@ -25,8 +25,7 @@ public class HomepageController extends AbstractController {
 	 * @return
 	 */
     @RequestMapping(value="/", method=RequestMethod.GET)
-    public String showHomepage(HttpServletRequest request, Model model){
-        model.addAttribute("menuSelection", "home");
+    public String showHomepage(HttpServletRequest request, Model model) {
         return "home";
     }
 }

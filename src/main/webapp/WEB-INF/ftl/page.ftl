@@ -1,6 +1,6 @@
 [#ftl]
 
-[#macro page]
+[#macro page menuSelection='']
 <!DOCTYPE html>
 <html>
   <head>
@@ -19,11 +19,11 @@
           </p>
         </form>
         <ul>
-          <li[#if (menuSelection!'') == 'home'] id="current"[/#if]><a href="/"><span>Home</span></a></li>
-          <li[#if (menuSelection!'') == 'entries'] id="current"[/#if]><a href="/games"><span>Entries</span></a></li>
-          <li[#if (menuSelection!'') == 'rules'] id="current"[/#if]><a href="/rules"><span>Rules</span></a></li>
-          <li[#if (menuSelection!'') == 'results'] id="current"[/#if]><a href="/results"><span>Results</span></a></li>
-          <li[#if (menuSelection!'') == 'submit'] id="current"[/#if]><a href="/submit"><span>Submit</span></a></li>
+          <li[#if menuSelection == 'home'] id="current"[/#if]><a href="/"><span>Home</span></a></li>
+          <li[#if menuSelection == 'games'] id="current"[/#if]><a href="/games"><span>Games</span></a></li>
+          <li[#if menuSelection == 'rules'] id="current"[/#if]><a href="/rules"><span>Rules</span></a></li>
+          <li[#if menuSelection == 'results'] id="current"[/#if]><a href="/results"><span>Results</span></a></li>
+          <li[#if menuSelection == 'submit'] id="current"[/#if]><a href="/submit"><span>Submit</span></a></li>
           <li>
             [#if user.loggedIn]
               <a href="${logoutUrl}"><span>Logout</span></a>
@@ -58,6 +58,15 @@
         </div>
       </div>
     </div>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-56568496-1', 'auto');
+  ga('send', 'pageview');
+    </script>
   </body>
 </html>
 [/#macro]
