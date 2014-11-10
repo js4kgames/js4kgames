@@ -1,9 +1,12 @@
 package com.appspot.js4kgames.controller;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import com.appspot.js4kgames.dao.UserDao;
 import com.appspot.js4kgames.model.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -19,6 +22,14 @@ public abstract class AbstractController {
      * Constant for the key used for storing the user profile in the session.
      */
     private static final String USER_SESSION_KEY = "js4kgames-user-profile";
+
+    // ---------------------- All controllers have access to all of the DAOs ----------------------- 
+    
+    protected UserDao userDao;
+
+    public void setUserDao(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
     /**
      * Adds the login URL to the model but only if the user is logged out.
@@ -51,40 +62,44 @@ public abstract class AbstractController {
      * 
      * @param request The current HTTP request.
      * 
-     * @return The user profile for the current user.
+     * @return The user profile for the current user, or null if their not logged in.
      */
     @ModelAttribute("user")
     public User getUser(HttpServletRequest request) {
+        User user = null;
+        
         UserService userService = UserServiceFactory.getUserService();
-        com.google.appengine.api.users.User googleUser = userService.getCurrentUser();
         
-        User user = (User) request.getSession(true).getAttribute(USER_SESSION_KEY);
-        
-        if (user == null) {
-            // TODO: Start by checking the user guid cookie.
+        if (userService.isUserLoggedIn()) {
+            user = (User) request.getSession(true).getAttribute(USER_SESSION_KEY);
             
-            // TODO: If there isn't a user guid, generate a new one.
-            
-            // TODO: Load the user from the data store at this point. For now we'll just create a new one.
-            
-            user = new User();
-        }
-
-        user.setLoggedIn(userService.isUserLoggedIn());
-        
-        if (googleUser != null) {
-            // User is logged in. Gets some details off the Google Account.
-            user.setEmailAddress(googleUser.getEmail());
-            user.setId(googleUser.getUserId());
-            user.setNickName(googleUser.getNickname());
-            user.setAdmin(userService.isUserAdmin());
+            if (user == null) {
+                com.google.appengine.api.users.User googleUser = userService.getCurrentUser();
+                
+                // Attempt to find the user in the data store.
+                user = userDao.find(googleUser.getUserId());
+                
+                // If we didn't find this user, create a new one.
+                if (user == null) {
+                    user = new User();
+                }
+                
+                // Update user details from the Google Account.
+                user.setEmailAddress(googleUser.getEmail());
+                user.setId(googleUser.getUserId());
+                user.setNickName(googleUser.getNickname());
+                user.setAdmin(userService.isUserAdmin());
+                user.setLoginCount(user.getLoginCount() + 1);
+                user.setLastLogin(new Date());
+                
+                userDao.save(user);
+                
+                request.getSession().setAttribute(USER_SESSION_KEY, user);
+            }
         } else {
-            user.setAdmin(false);
+            // User is not logged in, so remove the User from the session if it is still there.
+            request.getSession().removeAttribute(USER_SESSION_KEY);
         }
-        
-        // TODO: Update user profile to data store.
-        
-        request.getSession().setAttribute(USER_SESSION_KEY, user);
         
         return user;
     }

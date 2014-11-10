@@ -25,7 +25,7 @@
           <li[#if menuSelection == 'results'] id="current"[/#if]><a href="/results"><span>Results</span></a></li>
           <li[#if menuSelection == 'submit'] id="current"[/#if]><a href="/submit"><span>Submit</span></a></li>
           <li>
-            [#if user.loggedIn]
+            [#if user??]
               <a href="${logoutUrl}"><span>Logout</span></a>
             [#else]
               <a href="${loginUrl}"><span>Login</span></a>

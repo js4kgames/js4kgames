@@ -1,19 +1,27 @@
 package com.appspot.js4kgames.model;
 
 import java.io.Serializable;
+import java.util.Date;
+
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Ignore;
 
 /**
  * Holds the data of a js4kgames user's profile.
  * 
  * @author js4kgames
  */
+@Entity
 public class User implements Serializable {
 
     private static final long serialVersionUID = -7776203671377315915L;
 
+    /**
+     * This is the unique unchanging ID for the Google Account.
+     */
+    @Id
     private String id;
-	
-	private String guid;
 	
 	private String emailAddress;
 	
@@ -21,30 +29,25 @@ public class User implements Serializable {
 	
 	private String nickName;
 	
+	@Ignore
 	private boolean admin;
-	
-	private boolean loggedIn;
 	
 	private String twitterUrl;
 	
 	private String facebookUrl;
 	
 	private String googlePlusUrl;
-
+	
+	private int loginCount;
+	
+	private Date lastLogin;
+	
 	public String getId() {
 		return id;
 	}
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getGuid() {
-		return guid;
-	}
-
-	public void setGuid(String guid) {
-		this.guid = guid;
 	}
 
 	public String getEmailAddress() {
@@ -103,11 +106,19 @@ public class User implements Serializable {
         this.admin = admin;
     }
 
-    public boolean isLoggedIn() {
-        return loggedIn;
+    public int getLoginCount() {
+        return loginCount;
     }
 
-    public void setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
+    public void setLoginCount(int loginCount) {
+        this.loginCount = loginCount;
+    }
+
+    public Date getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(Date lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }

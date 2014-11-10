@@ -1,8 +1,13 @@
 package com.appspot.js4kgames.servlet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.reflections.Reflections;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -10,6 +15,10 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+
+import com.googlecode.objectify.ObjectifyFactory;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.annotation.Entity;
 
 /**
  * A customer Spring MVC DispatcherServlet sub class that sets up the DispatcherServlet 
@@ -52,10 +61,30 @@ public class Js4kGamesServlet extends DispatcherServlet {
 	    freemarkerViewResolverProps.add("suffix", ".ftl");
 	    context.registerSingleton(VIEW_RESOLVER_BEAN_NAME, FreeMarkerViewResolver.class, freemarkerViewResolverProps);
 	    
-	    // Register annotated beans using the data collected by Reflections API during the maven build.
+	    // Use data collected by Reflections API during the maven build.
 	    Reflections reflections = Reflections.collect();
-	    for (Class<?> controllerClass : reflections.getTypesAnnotatedWith(Controller.class)) {
-	      context.registerSingleton(StringUtils.uncapitalize(controllerClass.getSimpleName()), controllerClass);
+	    
+	    // Register the annotated Entities classes with Objectify.
+	    ObjectifyFactory objectifyFactory = ObjectifyService.factory();
+	    for (Class<?> entityClass : reflections.getTypesAnnotatedWith(Entity.class)) {
+	        objectifyFactory.register(entityClass);
 	    }
+	    
+	    // Register the DAOs with Spring, so that they can be injected into the controllers.
+	    List<String> daoBeanNames = new ArrayList<String>();
+	    for (Class<?> daoClass : reflections.getTypesAnnotatedWith(Repository.class)) {
+	        String daoBeanName = StringUtils.uncapitalize(daoClass.getSimpleName());
+	        context.registerSingleton(daoBeanName, daoClass);
+	        daoBeanNames.add(daoBeanName);
+	    }
+	    
+	    // Register annotated Controllers with Spring so that Spring MVC can find the RequestMappings.
+        for (Class<?> controllerClass : reflections.getTypesAnnotatedWith(Controller.class)) {
+            MutablePropertyValues controllerProps = new MutablePropertyValues();
+            for (String daoBeanName : daoBeanNames) {
+                controllerProps.add(daoBeanName, new RuntimeBeanReference(daoBeanName));
+            }
+            context.registerSingleton(StringUtils.uncapitalize(controllerClass.getSimpleName()), controllerClass, controllerProps);
+        }
 	}
 }

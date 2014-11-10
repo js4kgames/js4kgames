@@ -12,6 +12,7 @@
         <appengine.app.version>1</appengine.app.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-version>3.2.11.RELEASE</spring-version>
+        <objectify-version>5.1.1</objectify-version>
     </properties>
 
     <prerequisites>
@@ -55,6 +56,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
             <version>${spring-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.objectify</groupId>
+            <artifactId>objectify</artifactId>
+            <version>${objectify-version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -147,7 +153,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <includeExclude>+com.appspot.js4kgames.controller.*</includeExclude>
+                    <includeExclude>+com.appspot.js4kgames.controller.*,+com.appspot.js4kgames.model.*,+com.appspot.js4kgames.dao.*</includeExclude>
                     <parallel>true</parallel>
                     <scanners>TypeAnnotationsScanner</scanners>
                 </configuration>
